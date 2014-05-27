@@ -39,11 +39,22 @@ end
 
 class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
 
+  alias_method :original_execute, :execute
+
   def execute(sql, name = nil)
     value = super
     log_warnings(sql)
     value
   end
+
+  def exec_delete(sql, name, binds)
+    original_execute to_sql(sql, binds), name
+    affected_rows = @connection.affected_rows
+    log_warnings(sql)
+    affected_rows
+  end
+
+  alias :exec_update :exec_delete
 
   private
 

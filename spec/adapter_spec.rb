@@ -23,6 +23,28 @@ describe PedantMysql2 do
     expect(result.to_a).to be == [[1.0]]
   end
 
+  it 'do not change the returned value of exec_update' do
+    begin
+      connection.execute('CREATE TEMPORARY TABLE comment (id int)')
+      connection.execute('SET SESSION binlog_format = "STATEMENT"')
+      result = connection.update('UPDATE comment SET id = 1 LIMIT 1')
+      expect(result).to be == 0
+    ensure
+      connection.execute('DROP TEMPORARY TABLE comment')
+    end
+  end
+
+  it 'do not change the returned value of exec_delete' do
+    begin
+      connection.execute('CREATE TEMPORARY TABLE comment (id int)')
+      connection.execute('SET SESSION binlog_format = "STATEMENT"')
+      result = connection.delete('DELETE FROM comment LIMIT 1')
+      expect(result).to be == 0
+    ensure
+      connection.execute('DROP TEMPORARY TABLE comment')
+    end
+  end
+
   it 'can easily be raised' do
     PedantMysql2.on_warning = lambda { |warning| raise warning }
     expect {
