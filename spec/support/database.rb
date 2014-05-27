@@ -2,7 +2,7 @@ ActiveRecord::Base.configurations = {
   'test' => {
     adapter: 'pedant_mysql2',
     database: 'pedant_mysql2_test',
-    username: 'travis',
+    username: 'root',
     encoding: 'utf8',
     strict: false,
   },

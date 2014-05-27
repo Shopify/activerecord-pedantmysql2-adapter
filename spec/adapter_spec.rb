@@ -5,6 +5,9 @@ describe PedantMysql2 do
   let(:connection) { ActiveRecord::Base.connection }
 
   before :each do
+    connection.execute('SET SESSION binlog_format = "STATEMENT"')
+    connection.execute('CREATE TABLE IF NOT EXISTS comment (id int)')
+    connection.execute('TRUNCATE TABLE comment')
     @original_callback = PedantMysql2.on_warning
   end
 
@@ -24,25 +27,13 @@ describe PedantMysql2 do
   end
 
   it 'do not change the returned value of exec_update' do
-    begin
-      connection.execute('CREATE TEMPORARY TABLE comment (id int)')
-      connection.execute('SET SESSION binlog_format = "STATEMENT"')
-      result = connection.update('UPDATE comment SET id = 1 LIMIT 1')
-      expect(result).to be == 0
-    ensure
-      connection.execute('DROP TEMPORARY TABLE comment')
-    end
+    result = connection.update('UPDATE comment SET id = 1 LIMIT 1')
+    expect(result).to be_zero
   end
 
   it 'do not change the returned value of exec_delete' do
-    begin
-      connection.execute('CREATE TEMPORARY TABLE comment (id int)')
-      connection.execute('SET SESSION binlog_format = "STATEMENT"')
-      result = connection.delete('DELETE FROM comment LIMIT 1')
-      expect(result).to be == 0
-    ensure
-      connection.execute('DROP TEMPORARY TABLE comment')
-    end
+    result = connection.delete('DELETE FROM comment LIMIT 1')
+    expect(result).to be_zero
   end
 
   it 'can easily be raised' do
