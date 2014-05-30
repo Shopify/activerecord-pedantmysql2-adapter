@@ -55,6 +55,39 @@ end
 
 ```
 
+If you want to be able to have some queries react silently to MySQL warnings you can
+do the following:
+
+```ruby
+
+PedantMysql2.on_warning = lambda do |warning|
+  if PedantMysql2.silence_warnings?
+    # handle the warning a certain way or return
+  else
+    # simply pass the warning to the caller
+    raise warning
+  end
+end
+
+PedantMysql2.silence_warnings do
+  # perform query that may raise an error you want to stifle
+end
+ ```
+
+## Development
+
+Setting up the development environment is very straightforward. In order to keep the test
+as simple as possible we rely on your MySQL database to have a `travis` user and a
+`pedant_mysql2_test` database.
+
+You can set this up easily using the following commands as your `root` MySQL user:
+
+```
+CREATE USER 'travis'@'localhost';
+CREATE DATABASE pedant_mysql2_test;
+GRANT ALL PRIVILEGES ON pedant_mysql2_test.* TO 'travis'@'localhost';
+```
+
 ## Contributing
 
 1. Fork it ( http://github.com/Shopify/activerecord-pedantmysql2-adapter/fork )
