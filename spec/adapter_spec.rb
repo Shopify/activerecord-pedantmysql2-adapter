@@ -43,6 +43,27 @@ describe PedantMysql2 do
     }.to raise_error(MysqlWarning)
   end
 
+  it 'can allow blocks of queries to be silenced' do
+    PedantMysql2.on_warning = lambda do |warning|
+      raise warning unless PedantMysql2.silence_warnings?
+    end
+    expect {
+      PedantMysql2.silence_warnings do
+        expect(PedantMysql2.silence_warnings?).to be_true
+        connection.execute('SELECT 1 + "foo"')
+      end
+    }.to_not raise_error
+  end
+
+  it 'restores the old value that was stored in the thread_local silence_warnings' do
+    Thread.current[:silence_warnings] = 'abracadabra'
+    PedantMysql2.silence_warnings do
+      expect(Thread.current[:silence_warnings]).to be_true
+      connection.execute('SELECT 1 + "foo"')
+    end
+    expect(Thread.current[:silence_warnings]).to be == 'abracadabra'
+  end
+
   describe MysqlWarning do
 
     subject do
