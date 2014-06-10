@@ -49,7 +49,7 @@ describe PedantMysql2 do
     end
     expect {
       PedantMysql2.silence_warnings do
-        expect(PedantMysql2.silence_warnings?).to be_true
+        expect(PedantMysql2.silence_warnings?).to be true
         connection.execute('SELECT 1 + "foo"')
       end
     }.to_not raise_error
@@ -58,7 +58,7 @@ describe PedantMysql2 do
   it 'restores the old value that was stored in the thread_local silence_warnings' do
     Thread.current[:silence_warnings] = 'abracadabra'
     PedantMysql2.silence_warnings do
-      expect(Thread.current[:silence_warnings]).to be_true
+      expect(Thread.current[:silence_warnings]).to be true
       connection.execute('SELECT 1 + "foo"')
     end
     expect(Thread.current[:silence_warnings]).to be == 'abracadabra'
