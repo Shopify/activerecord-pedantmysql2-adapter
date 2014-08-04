@@ -1,1 +1,2 @@
-# using the default shipit config
+fetch:
+  - fetch-gem-version activerecord-pedantmysql2-adapter Shopify/activerecord-pedantmysql2-adapter
