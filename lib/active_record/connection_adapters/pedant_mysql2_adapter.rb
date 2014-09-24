@@ -1,6 +1,10 @@
 require 'active_record/connection_adapters/mysql2_adapter'
 
 module ActiveRecord
+  class CannotConnect < StatementInvalid; end
+end
+
+module ActiveRecord
   module ConnectionHandling
     def pedant_mysql2_connection(config)
       config = config.symbolize_keys
@@ -18,7 +22,7 @@ module ActiveRecord
       if error.message.include?("Unknown database") && defined?(ActiveRecord::NoDatabaseError)
         raise ActiveRecord::NoDatabaseError.new(error.message)
       else
-        raise
+        raise ActiveRecord::CannotConnect.new(error.message, error)
       end
     end
   end

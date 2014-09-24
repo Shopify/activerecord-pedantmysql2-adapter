@@ -15,4 +15,9 @@ describe ActiveRecord::ConnectionHandling do
     }.to raise_error(ActiveRecord::NoDatabaseError)
   end
 
+  it 'raises CannotConnect when it cannot connect to the database' do
+    expect {
+      Mock.new.pedant_mysql2_connection({host: '127.0.0.1', port: 10})
+    }.to raise_error(ActiveRecord::CannotConnect)
+  end
 end
