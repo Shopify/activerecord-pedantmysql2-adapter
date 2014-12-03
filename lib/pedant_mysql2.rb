@@ -20,7 +20,21 @@ module PedantMysql2
     end
 
     def silence_warnings!
-      self.on_warning = lambda{ |*| }
+      self.on_warning = nil
+    end
+
+    def ignore(*matchers)
+      self.whitelist.concat(matchers.flatten)
+    end
+
+    def ignored?(warning)
+      on_warning.nil? || whitelist.any? { |matcher| matcher =~ warning.message }
+    end
+
+    protected
+
+    def whitelist
+      @whitelist ||= []
     end
 
   end

@@ -6,6 +6,7 @@ describe PedantMysql2 do
 
   before :each do
     PedantMysql2.raise_warnings!
+    PedantMysql2.instance_variable_set(:@whitelist, nil)
     connection.execute('SET SESSION binlog_format = "STATEMENT"')
     if connection.execute('SHOW TABLES LIKE "comment"').size == 0
       connection.execute('CREATE TABLE comment (id int)')
@@ -22,6 +23,13 @@ describe PedantMysql2 do
     expect {
       connection.execute('SELECT 1 + "foo"')
     }.to raise_error(MysqlWarning, "Truncated incorrect DOUBLE value: 'foo'")
+  end
+
+  it 'can have a whitelist of warnings' do
+    PedantMysql2.ignore(/Truncated incorrect DOUBLE value/i)
+    expect {
+      connection.execute('SELECT 1 + "foo"')
+    }.to_not raise_error
   end
 
   it 'do not change the returned value' do
