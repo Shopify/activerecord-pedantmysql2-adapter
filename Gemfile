@@ -1,5 +1,7 @@
 source 'https://rubygems.org'
 
-gem 'byebug', group: :development
+if RUBY_VERSION >= '2.0.0'
+  gem 'byebug', group: :development
+end
 
 gemspec
