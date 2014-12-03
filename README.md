@@ -29,18 +29,18 @@ Finally in your `database.yml`:
 
 ## Usage
 
-By default it do nothing with the warnings, you have to define the behaviour yourself in an initializer.
+By default it will raise warnings as errors. But you can define any behaviour yourself in an initializer.
 
-You can either raise on all errors:
-
-```ruby
-  PedantMysql2.on_warning = lambda { |warning| raise warning }
-```
-
-Or report them to your exception tracker:
+You can report them to your exception tracker:
 
 ```ruby
   PedantMysql2.on_warning = lambda { |warning| Airbrake.notify(warning) }
+```
+
+or totally silence them:
+
+```ruby
+  PedantMysql2.on_warning = lambda { |*| }
 ```
 
 Or whatever else behaviour you want (logging).
@@ -48,28 +48,13 @@ Or whatever else behaviour you want (logging).
 You can easilly whitelist some types of warnings:
 
 ```ruby
-
-PedantMysql2.on_warning = lambda do |warning|
-  raise warning unless WARNINGS_WHITELIST.any? { |pattern| pattern =~ warning.message }
-end
-
+PedantMysql2.ignore(/Some warning I don't care about/i)
 ```
 
-If you want to be able to have some queries react silently to MySQL warnings you can
-do the following:
+If you want to silence warnings for a limited scope, you can capture the warnings:
 
 ```ruby
-
-PedantMysql2.on_warning = lambda do |warning|
-  if PedantMysql2.silence_warnings?
-    # handle the warning a certain way or return
-  else
-    # simply pass the warning to the caller
-    raise warning
-  end
-end
-
-PedantMysql2.silence_warnings do
+warnings = PedantMysql2.capture_warnings do
   # perform query that may raise an error you want to stifle
 end
  ```
