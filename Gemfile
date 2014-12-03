@@ -1,4 +1,7 @@
 source 'https://rubygems.org'
 
-# Specify your gem's dependencies in activerecord-pedantmysql2-adapter.gemspec
+if RUBY_VERSION >= '2.0.0'
+  gem 'byebug', group: :development
+end
+
 gemspec
