@@ -34,7 +34,6 @@ class MysqlWarning < StandardError
     @level = level
     @query = query
   end
-
 end
 
 class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
@@ -67,5 +66,8 @@ class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::Conn
       ::PedantMysql2.on_warning.call(warning) unless PedantMysql2.ignored?(warning)
     end
   end
+end
 
+if ActiveRecord::VERSION::MAJOR == 3
+  ActiveRecord::Base.extend(ActiveRecord::ConnectionHandling)
 end
