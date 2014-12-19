@@ -3,5 +3,13 @@ rvm:
   - 2.0.0
   - 2.1.2
 
+gemfile:
+  - Gemfile.activerecord32
+  - Gemfile.activerecord40
+  - Gemfile.activerecord41
+  - Gemfile.activerecord42
+
 before_script:
   - mysql -e 'create database pedant_mysql2_test;'
+
+sudo: false
