@@ -39,12 +39,12 @@ describe PedantMysql2 do
   end
 
   it 'do not change the returned value of exec_update' do
-    result = connection.update('UPDATE comment SET id = 1 LIMIT 1')
+    result = connection.update('UPDATE comment SET id = 1 ORDER BY id LIMIT 1')
     expect(result).to be_zero
   end
 
   it 'do not change the returned value of exec_delete' do
-    result = connection.delete('DELETE FROM comment LIMIT 1')
+    result = connection.delete('DELETE FROM comment ORDER BY id LIMIT 1')
     expect(result).to be_zero
   end
 
