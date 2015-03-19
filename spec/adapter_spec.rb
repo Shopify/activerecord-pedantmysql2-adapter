@@ -19,22 +19,39 @@ describe PedantMysql2 do
     PedantMysql2.on_warning = @original_callback
   end
 
+  def execute_with_warning
+    ActiveRecord::Base.connection.execute('SELECT 1 + "foo"')
+  end
+
+  def wait_for(thread)
+    sleep 0.1 until thread.stop?
+  end
+
+  # Used by the thread-safe testing
+  def method_missing(method_name,*args)
+    if PedantMysql2.respond_to?(method_name, true)
+      PedantMysql2.send(method_name,*args)
+    else
+      super
+    end
+  end
+
   it 'raises warnings by default' do
     expect {
-      connection.execute('SELECT 1 + "foo"')
+      execute_with_warning
     }.to raise_error(MysqlWarning, "Truncated incorrect DOUBLE value: 'foo'")
   end
 
   it 'can have a whitelist of warnings' do
     PedantMysql2.ignore(/Truncated incorrect DOUBLE value/i)
     expect {
-      connection.execute('SELECT 1 + "foo"')
+      execute_with_warning
     }.to_not raise_error
   end
 
   it 'do not change the returned value' do
     PedantMysql2.silence_warnings!
-    result = connection.execute('SELECT 1 + "foo"')
+    result = execute_with_warning
     expect(result.to_a).to be == [[1.0]]
   end
 
@@ -51,7 +68,7 @@ describe PedantMysql2 do
   it 'can easily be raised' do
     PedantMysql2.on_warning = lambda { |warning| raise warning }
     expect {
-      connection.execute('SELECT 1 + "foo"')
+      execute_with_warning
     }.to raise_error(MysqlWarning)
   end
 
@@ -59,22 +76,53 @@ describe PedantMysql2 do
     warnings = nil
     expect {
       warnings = PedantMysql2.capture_warnings do
-        connection.execute('SELECT 1 + "foo"')
+        execute_with_warning
       end
     }.to_not raise_error
-    
+
     expect(warnings.size).to be == 1
     expect(warnings.first).to be_a MysqlWarning
     expect(warnings.first.message).to be == "Truncated incorrect DOUBLE value: 'foo'"
   end
 
   it 'restores the old value that was stored in the thread_local capture_warnings' do
-    Thread.current[:mysql_warnings] = 'abracadabra'
-    PedantMysql2.capture_warnings do
-      expect(Thread.current[:mysql_warnings]).to be_an Array
-      connection.execute('SELECT 1 + "foo"')
+    warnings1 = nil
+    warnings2 = nil
+
+    warnings1 = PedantMysql2.capture_warnings do
+      execute_with_warning
+      warnings2 = PedantMysql2.capture_warnings do
+        execute_with_warning
+        execute_with_warning
+      end
     end
-    expect(Thread.current[:mysql_warnings]).to be == 'abracadabra'
+
+    expect(warnings1.size).to be == 1
+    expect(warnings2.size).to be == 2
+    expect(warnings2).to_not include(warnings1)
+  end
+
+  it 'should be thread-safe to capture_warnings (when class instance variables were used this did not pass)' do
+    thread = Thread.new do
+      warnings = backup_warnings
+      Thread.stop
+      setup_capture
+      Thread.stop
+      execute_with_warning
+      expect(captured_warnings.size).to be == 1
+      restore_warnings(warnings)
+    end
+
+    wait_for(thread)
+    warnings = backup_warnings
+    thread.run
+    wait_for(thread)
+    setup_capture
+    execute_with_warning
+    expect(captured_warnings.size).to be == 1
+    restore_warnings(warnings)
+    thread.run
+    thread.join
   end
 
   describe MysqlWarning do
@@ -82,7 +130,7 @@ describe PedantMysql2 do
     subject do
       begin
         PedantMysql2.on_warning = lambda { |warning| raise warning }
-        connection.execute('SELECT 1 + "foo"')
+        execute_with_warning
       rescue MysqlWarning => exception
         exception
       end

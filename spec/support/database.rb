@@ -5,6 +5,7 @@ ActiveRecord::Base.configurations = {
     username: 'travis',
     encoding: 'utf8',
     strict: false,
+    pool: 5,
   },
 }
 ActiveRecord::Base.establish_connection(:test)
