@@ -125,6 +125,17 @@ describe PedantMysql2 do
     thread.join
   end
 
+  it 'should inherit on_warning from parent thread' do
+    PedantMysql2.silence_warnings!
+    thread = Thread.new do
+      expect {
+        execute_with_warning
+      }.to_not raise_error
+    end
+
+    thread.join
+  end
+
   describe MysqlWarning do
 
     subject do

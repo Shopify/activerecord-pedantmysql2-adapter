@@ -65,9 +65,10 @@ end
 
 ## Thread-safe
 
-This gem is tested to be thread safe with one known exception.
+This gem is tested to be thread safe with a couple known exceptions.
 
-`PedantMysql2.ignore` is not thread safe and should only be called during intialization of your app. Changing this within a thread while another is updating it could be problematic.
+`PedantMysql2.ignore` is not thread safe and should only be called during initialization of your app. Changing this within a thread while another is updating it could be problematic.
+`PedantMysql2.on_warning=` is not thread safe, this should also be called only during initialization.
 
 If you find any other parts that are not thread-safe, please create an issue or PR.
 

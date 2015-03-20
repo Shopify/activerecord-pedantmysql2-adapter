@@ -32,11 +32,11 @@ module PedantMysql2
     end
 
     def on_warning
-      Thread.current[:__pedant_mysql2_on_warning]
+      Thread.current[:__pedant_mysql2_on_warning] || @_on_warning
     end
 
     def on_warning=(new_proc)
-      Thread.current[:__pedant_mysql2_on_warning] = new_proc
+      @_on_warning = new_proc
     end
 
     protected
@@ -51,7 +51,7 @@ module PedantMysql2
 
     def setup_capture
       Thread.current[:__pedant_mysql2_warnings] = []
-      self.on_warning = lambda { |warning| Thread.current[:__pedant_mysql2_warnings] << warning }
+      self.thread_on_warning = lambda { |warning| Thread.current[:__pedant_mysql2_warnings] << warning }
     end
 
     def captured_warnings
@@ -59,11 +59,15 @@ module PedantMysql2
     end
 
     def backup_warnings
-      [captured_warnings, on_warning]
+      [captured_warnings, Thread.current[:__pedant_mysql2_on_warning]]
     end
 
     def restore_warnings(warnings)
-      Thread.current[:__pedant_mysql2_warnings], self.on_warning = *warnings
+      Thread.current[:__pedant_mysql2_warnings], self.thread_on_warning = *warnings
+    end
+
+    def thread_on_warning=(new_proc)
+      Thread.current[:__pedant_mysql2_on_warning] = new_proc
     end
   end
 end
