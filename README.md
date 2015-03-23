@@ -40,10 +40,14 @@ You can report them to your exception tracker:
 or totally silence them:
 
 ```ruby
-  PedantMysql2.on_warning = lambda { |*| }
+  PedantMysql2.silence_warnings!
 ```
 
-Or whatever else behaviour you want (logging).
+and to restore it to raising warnings as errors:
+
+```ruby
+  PedantMysql2.raise_warnings!
+```
 
 You can easilly whitelist some types of warnings:
 
@@ -58,6 +62,15 @@ warnings = PedantMysql2.capture_warnings do
   # perform query that may raise an error you want to stifle
 end
  ```
+
+## Thread-safe
+
+This gem is tested to be thread safe with a couple known exceptions.
+
+`PedantMysql2.ignore` is not thread safe and should only be called during initialization of your app. Changing this within a thread while another is updating it could be problematic.
+`PedantMysql2.on_warning=` is not thread safe, this should also be called only during initialization.
+
+If you find any other parts that are not thread-safe, please create an issue or PR.
 
 ## Development
 

@@ -63,7 +63,7 @@ class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::Conn
     result = @connection.query('SHOW WARNINGS')
     result.each do |level, code, message|
       warning = MysqlWarning.new(message, code, level, sql)
-      ::PedantMysql2.on_warning.call(warning) unless PedantMysql2.ignored?(warning)
+      ::PedantMysql2.warn(warning)
     end
   end
 end
