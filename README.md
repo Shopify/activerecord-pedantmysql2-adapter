@@ -26,6 +26,9 @@ Finally in your `database.yml`:
 
     adapter: pedant_mysql2
 
+Or if you're using `DATABASE_URL` or the url key in `database.yml`, you can use the `pedant-mysql2` URL scheme:
+
+    url: pedant-mysql2://host/database
 
 ## Usage
 
