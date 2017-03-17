@@ -12,6 +12,7 @@ module ActiveRecord
       end
 
       client = Mysql2::Client.new(config)
+
       options = [config[:host], config[:username], config[:password], config[:database], config[:port], config[:socket], 0]
       ActiveRecord::ConnectionAdapters::PedantMysql2Adapter.new(client, logger, options, config)
     rescue Mysql2::Error => error
@@ -37,9 +38,6 @@ class MysqlWarning < StandardError
 end
 
 class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
-
-  alias_method :original_execute, :execute
-
   def execute(sql, name = nil)
     value = super
     log_warnings(sql)
@@ -47,10 +45,9 @@ class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::Conn
   end
 
   def exec_delete(sql, name, binds)
-    original_execute to_sql(sql, binds), name
-    affected_rows = @connection.affected_rows
-    log_warnings(sql)
-    affected_rows
+    @affected_rows_before_logging = nil
+    value = super
+    @affected_rows_before_logging || value
   end
 
   alias :exec_update :exec_delete
@@ -60,7 +57,9 @@ class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::Conn
   def log_warnings(sql)
     return unless @connection.warning_count > 0
 
+    @affected_rows_before_logging = @connection.affected_rows
     result = @connection.query('SHOW WARNINGS')
+
     result.each do |level, code, message|
       warning = MysqlWarning.new(message, code, level, sql)
       ::PedantMysql2.warn(warning)

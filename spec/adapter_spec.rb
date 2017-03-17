@@ -55,13 +55,27 @@ describe PedantMysql2 do
     expect(result.to_a).to be == [[1.0]]
   end
 
-  it 'do not change the returned value of exec_update' do
+  it 'does not change the returned value of exec_update' do
+    connection.execute('INSERT INTO comment VALUES (17)')
     result = connection.update('UPDATE comment SET id = 1 ORDER BY id LIMIT 1')
+    expect(result).to be == 1
+  end
+
+  it 'does not change the returned value of exec_update when there is warnings' do
+    PedantMysql2.silence_warnings!
+    result = connection.update('UPDATE comment SET id = 1 WHERE id > (42+"foo") ORDER BY id LIMIT 1')
     expect(result).to be_zero
   end
 
-  it 'do not change the returned value of exec_delete' do
+  it 'does not change the returned value of exec_delete' do
+    connection.execute('INSERT INTO comment VALUES (17)')
     result = connection.delete('DELETE FROM comment ORDER BY id LIMIT 1')
+    expect(result).to be == 1
+  end
+
+  it 'does not change the returned value of exec_delete when there is warnings' do
+    PedantMysql2.silence_warnings!
+    result = connection.delete('DELETE FROM comment WHERE id > (42+"foo") ORDER BY id LIMIT 1')
     expect(result).to be_zero
   end
 
