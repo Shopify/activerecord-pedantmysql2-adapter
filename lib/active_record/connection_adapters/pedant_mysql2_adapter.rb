@@ -37,8 +37,6 @@ class MysqlWarning < StandardError
 end
 
 class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
-  alias_method :exec_delete_without_pedant, :exec_delete
-
   def execute(sql, name = nil)
     value = super
     log_warnings(sql)
@@ -46,10 +44,9 @@ class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::Conn
   end
 
   def exec_delete(sql, name, binds)
-    exec_delete_without_pedant(to_sql(sql, binds), name, binds)
-    affected_rows = @connection.affected_rows
+    value = super
     log_warnings(sql)
-    affected_rows
+    value
   end
 
   alias :exec_update :exec_delete
