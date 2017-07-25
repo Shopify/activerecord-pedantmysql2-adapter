@@ -19,8 +19,8 @@ describe PedantMysql2 do
     PedantMysql2.on_warning = @original_callback
   end
 
-  def execute_with_warning
-    ActiveRecord::Base.connection.execute('SELECT 1 + "foo"')
+  def execute_with_warning(query = 'SELECT 1 + "foo"')
+    ActiveRecord::Base.connection.execute(query)
   end
 
   def wait_for(thread)
@@ -40,6 +40,12 @@ describe PedantMysql2 do
     expect {
       execute_with_warning
     }.to raise_error(MysqlWarning, "Truncated incorrect DOUBLE value: 'foo'")
+  end
+
+  it 'does not raise when warning warns about unexisting table' do
+    expect {
+      execute_with_warning('DROP TABLE IF EXISTS `example_table`')
+    }.to_not raise_error
   end
 
   it 'can have a whitelist of warnings' do
