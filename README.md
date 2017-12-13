@@ -52,7 +52,7 @@ and to restore it to raising warnings as errors:
   PedantMysql2.raise_warnings!
 ```
 
-You can easilly whitelist some types of warnings:
+You can easily whitelist some types of warnings:
 
 ```ruby
 PedantMysql2.ignore(/Some warning I don't care about/i)
