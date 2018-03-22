@@ -1,25 +1,21 @@
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.1.2
   - 2.2.2
   - 2.3.0
+  - 2.4.3
+  - 2.5.0
 
 gemfile:
-  - Gemfile.activerecord32
-  - Gemfile.activerecord40
-  - Gemfile.activerecord41
-  - Gemfile.activerecord42
-  - Gemfile.activerecord50
+  - gemfiles/Gemfile.activerecord50
+  - gemfiles/Gemfile.activerecord51
+  - gemfiles/Gemfile.activerecord52
+  - gemfiles/Gemfile.activerecord-edge
 
 matrix:
   exclude:
-    - rvm: 1.9.3
-      gemfile: Gemfile.activerecord50
-    - rvm: 2.0.0
-      gemfile: Gemfile.activerecord50
-    - rvm: 2.1.2
-      gemfile: Gemfile.activerecord50
+    - rvm: 2.2.2
+      gemfile: gemfiles/Gemfile.activerecord-edge
+    - rvm: 2.3.0
+      gemfile: gemfiles/Gemfile.activerecord-edge
 
 before_script:
   - mysql -e 'create database pedant_mysql2_test;'
