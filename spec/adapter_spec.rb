@@ -7,6 +7,7 @@ describe PedantMysql2 do
   before :each do
     PedantMysql2.raise_warnings!
     PedantMysql2.instance_variable_set(:@whitelist, nil)
+    PedantMysql2.ignore(/They will be merged with strict mode in a future release/)
     connection.execute('SET SESSION binlog_format = "STATEMENT"')
     if connection.execute('SHOW TABLES LIKE "comment"').size == 0
       connection.execute('CREATE TABLE comment (id int)')
