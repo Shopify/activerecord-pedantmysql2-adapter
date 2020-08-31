@@ -2,24 +2,44 @@ require 'active_record/connection_adapters/mysql2_adapter'
 
 module ActiveRecord
   module ConnectionHandling
-    def pedant_mysql2_connection(config)
-      config = config.symbolize_keys
+    if ConnectionAdapters::Mysql2Adapter.respond_to?(:new_client)
+      def pedant_mysql2_connection(config)
+        config = config.symbolize_keys
+        config[:flags] ||= 0
 
-      config[:username] = 'root' if config[:username].nil?
+        if config[:flags].kind_of? Array
+          config[:flags].push "FOUND_ROWS"
+        else
+          config[:flags] |= Mysql2::Client::FOUND_ROWS
+        end
 
-      if Mysql2::Client.const_defined? :FOUND_ROWS
-        config[:flags] = Mysql2::Client::FOUND_ROWS
+        ConnectionAdapters::PedantMysql2Adapter.new(
+          ConnectionAdapters::Mysql2Adapter.new_client(config),
+          logger,
+          nil,
+          config,
+        )
       end
+    else
+      def pedant_mysql2_connection(config)
+        config = config.symbolize_keys
 
-      client = Mysql2::Client.new(config)
+        config[:username] = 'root' if config[:username].nil?
 
-      options = [config[:host], config[:username], config[:password], config[:database], config[:port], config[:socket], 0]
-      ActiveRecord::ConnectionAdapters::PedantMysql2Adapter.new(client, logger, options, config)
-    rescue Mysql2::Error => error
-      if error.message.include?("Unknown database") && defined?(ActiveRecord::NoDatabaseError)
-        raise ActiveRecord::NoDatabaseError.new(error.message)
-      else
-        raise
+        if Mysql2::Client.const_defined? :FOUND_ROWS
+          config[:flags] = Mysql2::Client::FOUND_ROWS
+        end
+
+        client = Mysql2::Client.new(config)
+
+        options = [config[:host], config[:username], config[:password], config[:database], config[:port], config[:socket], 0]
+        ActiveRecord::ConnectionAdapters::PedantMysql2Adapter.new(client, logger, options, config)
+      rescue Mysql2::Error => error
+        if error.message.include?("Unknown database") && defined?(ActiveRecord::NoDatabaseError)
+          raise ActiveRecord::NoDatabaseError.new(error.message)
+        else
+          raise
+        end
       end
     end
   end

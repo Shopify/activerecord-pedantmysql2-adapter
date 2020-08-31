@@ -46,11 +46,11 @@ module PedantMysql2
     end
 
     def ignored?(warning)
-      whitelist.any? { |matcher| matcher =~ warning.message } || drop_table_warning(warning)
+      whitelist.any? { |matcher| warning.message.match?(matcher) } || drop_table_warning(warning)
     end
 
     def drop_table_warning(warning)
-      warning.query =~ /\ADROP TABLE IF EXISTS/ || warning.message =~ /\AUnknown table/
+      warning.query.match?(/\ADROP TABLE IF EXISTS/) || warning.message.match?(/\AUnknown table/)
     end
 
     def setup_capture
