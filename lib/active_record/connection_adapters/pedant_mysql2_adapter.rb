@@ -2,6 +2,10 @@ require 'active_record/connection_adapters/mysql2_adapter'
 
 module ActiveRecord
   module ConnectionHandling
+    def pedant_mysql2_connection_adapter_class
+      ConnectionAdapters::PedantMysql2Adapter
+    end
+
     if ConnectionAdapters::Mysql2Adapter.respond_to?(:new_client)
       def pedant_mysql2_connection(config)
         config = config.symbolize_keys
@@ -13,7 +17,7 @@ module ActiveRecord
           config[:flags] |= Mysql2::Client::FOUND_ROWS
         end
 
-        ConnectionAdapters::PedantMysql2Adapter.new(
+        pedant_mysql2_connection_adapter_class.new(
           ConnectionAdapters::Mysql2Adapter.new_client(config),
           logger,
           nil,
@@ -33,7 +37,7 @@ module ActiveRecord
         client = Mysql2::Client.new(config)
 
         options = [config[:host], config[:username], config[:password], config[:database], config[:port], config[:socket], 0]
-        ActiveRecord::ConnectionAdapters::PedantMysql2Adapter.new(client, logger, options, config)
+        pedant_mysql2_connection_adapter_class.new(client, logger, options, config)
       rescue Mysql2::Error => error
         if error.message.include?("Unknown database") && defined?(ActiveRecord::NoDatabaseError)
           raise ActiveRecord::NoDatabaseError.new(error.message)
@@ -58,6 +62,8 @@ class MysqlWarning < StandardError
 end
 
 class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
+  ADAPTER_NAME = "pedant_mysql2"
+  
   def execute(sql, name = nil)
     value = super
     log_warnings(sql)
