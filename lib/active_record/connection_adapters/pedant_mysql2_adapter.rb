@@ -58,11 +58,12 @@ class MysqlWarning < StandardError
 end
 
 class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::ConnectionAdapters::Mysql2Adapter
-  def execute(sql, name = nil)
+  def execute(sql, *)
     value = super
     log_warnings(sql)
     value
   end
+  ruby2_keywords :execute if respond_to?(:ruby2_keywords, true)
 
   def exec_delete(sql, name, binds)
     @affected_rows_before_logging = nil

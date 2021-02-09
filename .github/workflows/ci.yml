@@ -1,0 +1,31 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Ruby ${{ matrix.ruby }} / Active Record ${{ matrix.activerecord }}
+    strategy:
+      matrix:
+        ruby: ['2.6', '2.7', '3.0']
+        activerecord: ['6.0', '6.1', 'edge']
+        exclude:
+          - ruby: '2.6'
+            activerecord: 'edge'
+    env:
+      BUNDLE_GEMFILE: gemfiles/Gemfile.activerecord-${{ matrix.activerecord }}
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+    - name: Set up Ruby ${{ matrix.ruby }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+    - name: Start MySQL and create DB
+      run: |
+        sudo systemctl start mysql.service
+        mysql -uroot -proot -e 'create database pedant_mysql2_test;'
+    - name: Ruby Tests
+      run: bundle exec rake
