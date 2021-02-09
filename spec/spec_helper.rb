@@ -4,13 +4,28 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'rspec/its'
 require 'simplecov'
 require 'coveralls'
-SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter[
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new([
   SimpleCov::Formatter::HTMLFormatter,
   Coveralls::SimpleCov::Formatter
-]
+])
 SimpleCov.start
 
 require 'activerecord-pedantmysql2-adapter'
+
+module TestSupport
+  DB_CONFIG = {
+    'adapter' => 'pedant_mysql2',
+    'database' => 'pedant_mysql2_test',
+    'username' => 'root',
+    'password' => ENV['CI'] ? 'root' : nil,
+    'encoding' => 'utf8',
+    'host' => 'localhost',
+    'strict' => false,
+    'pool' => 5,
+  }.freeze
+end
+
+ActiveRecord::Base.establish_connection(TestSupport::DB_CONFIG)
 
 Dir[File.expand_path(File.join(File.dirname(__FILE__), 'support', '**', '*.rb'))].each { |f| require f }
 
