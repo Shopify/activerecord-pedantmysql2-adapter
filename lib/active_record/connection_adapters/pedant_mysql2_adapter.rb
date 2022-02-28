@@ -76,10 +76,13 @@ class ActiveRecord::ConnectionAdapters::PedantMysql2Adapter < ActiveRecord::Conn
   private
 
   def log_warnings(sql)
-    return unless @connection.warning_count > 0
+    # support for https://github.com/rails/rails/commit/d86fd6415c0dfce6fadb77e74696cf728e5eb76b
+    connection = instance_variable_defined?(:@raw_connection) ? @raw_connection : @connection
 
-    @affected_rows_before_logging = @connection.affected_rows
-    result = @connection.query('SHOW WARNINGS')
+    return unless connection.warning_count > 0
+
+    @affected_rows_before_logging = connection.affected_rows
+    result = connection.query('SHOW WARNINGS')
 
     result.each do |level, code, message|
       warning = MysqlWarning.new(message, code, level, sql)
