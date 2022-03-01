@@ -18,7 +18,7 @@ module TestSupport
     'database' => 'pedant_mysql2_test',
     'username' => 'root',
     'password' => ENV['CI'] ? 'root' : nil,
-    'encoding' => 'utf8',
+    'encoding' => 'utf8mb4',
     'host' => 'localhost',
     'strict' => false,
     'pool' => 5,
