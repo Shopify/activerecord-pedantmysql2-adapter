@@ -42,7 +42,7 @@ describe PedantMysql2 do
     }.to raise_error(MysqlWarning, "Truncated incorrect DOUBLE value: 'foo'")
   end
 
-  it 'does not raise when warning warns about unexisting table' do
+  it 'does not raise when warning is a Note level warning e.g. unexisting table' do
     expect {
       execute_with_warning('DROP TABLE IF EXISTS `example_table`')
     }.to_not raise_error
