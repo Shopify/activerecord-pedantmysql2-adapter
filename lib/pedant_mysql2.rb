@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module PedantMysql2
   class << self
     def capture_warnings
@@ -46,7 +48,15 @@ module PedantMysql2
     end
 
     def ignored?(warning)
-      whitelist.any? { |matcher| warning.message.match?(matcher) } || drop_table_warning(warning)
+      return true if whitelist.any? { |matcher| warning.message.match?(matcher) }
+      return true if note_warning?(warning)
+      return true if drop_table_warning(warning)
+
+      false
+    end
+
+    def note_warning?(warning)
+      warning.level == "Note"
     end
 
     def drop_table_warning(warning)

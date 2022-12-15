@@ -48,6 +48,12 @@ describe PedantMysql2 do
     }.to_not raise_error
   end
 
+  it 'does not raise when warning is a Note level warning e.g. EXPLAIN queries' do
+    expect {
+      execute_with_warning('EXPLAIN SELECT 1')
+    }.to_not raise_error
+  end
+
   it 'can have a whitelist of warnings' do
     PedantMysql2.ignore(/Truncated incorrect DOUBLE value/i)
     expect {
