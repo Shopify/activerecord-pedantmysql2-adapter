@@ -4,6 +4,8 @@ module ActiveRecord
   module ConnectionHandling
     if ConnectionAdapters::Mysql2Adapter.respond_to?(:new_client)
       def pedant_mysql2_connection(config)
+        raise_pedant_deprecation_warning
+
         config = config.symbolize_keys
         config[:flags] ||= 0
 
@@ -22,6 +24,8 @@ module ActiveRecord
       end
     else
       def pedant_mysql2_connection(config)
+        raise_pedant_deprecation_warning
+
         config = config.symbolize_keys
 
         config[:username] = 'root' if config[:username].nil?
@@ -40,6 +44,16 @@ module ActiveRecord
         else
           raise
         end
+      end
+    end
+
+    def raise_pedant_deprecation_warning
+      if ActiveRecord.gem_version >= Gem::Version.new("7.1")
+        ActiveSupport::Deprecation.warn(<<~MSG.squish)
+          `activerecord-pedantmysql2-adapter` is deprecated. SQL warning behaviour is available in Active Record,
+          starting in version 7.1. This gem will soon be archived. Please migrate to the upstream behaviour:
+          https://edgeguides.rubyonrails.org/configuring.html#config-active-record-db-warnings-action.
+        MSG
       end
     end
   end
