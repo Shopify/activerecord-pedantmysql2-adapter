@@ -5,7 +5,7 @@
 [![Coverage Status](https://coveralls.io/repos/Shopify/activerecord-pedantmysql2-adapter/badge.png)](https://coveralls.io/r/Shopify/activerecord-pedantmysql2-adapter)
 [![Gem Version](https://badge.fury.io/rb/activerecord-pedantmysql2-adapter.png)](http://badge.fury.io/rb/activerecord-pedantmysql2-adapter)
 
-**This gem is deprecated as of Active Record 7.1, and will be archived once a subsequent version of Active Record is released.**
+**This repository is archived and no longer maintained. The gem has been deprecated since Active Record 7.1.**
 
 SQL warning reporting is available on all MySQL Active Record adapter classes as of version 7.1.
 Please migrate to the [upstream API](https://edgeguides.rubyonrails.org/configuring.html#config-active-record-db-warnings-action).
